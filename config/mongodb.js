@@ -10,10 +10,14 @@ exports.connect = () => {
             dbClient = client;
             console.log("MongoDb has been connected");
         },
-        (err) => console.log(err)
+        (err) => {
+            console.log(err)
+            console.log("retrying");
+            this.connect();
+        }
     )
 }
 
 exports.getCollection = (name) =>{
-    dbClient.db("movies").collection(name);
+    return dbClient.db("movies").collection(name);
 }

@@ -6,14 +6,14 @@ const getMovieCollection = () =>{
 }
 
 exports.returnAllMovie = (req, callback) =>{
-    getMovieCollection.find({}).toArray()
+    getMovieCollection().find({}).toArray()
         .then((data)=>{
             callback(data);
         })
 }
 
 exports.findByName = (name, callback) =>{
-    getMovieCollection.findOne({name})
+    getMovieCollection().findOne({name})
         .then((data)=>{
             callback(data);
             },
@@ -23,16 +23,17 @@ exports.findByName = (name, callback) =>{
 
 
 exports.topThreeRated = (req, callback) =>{
-    getMovieCollection.find({}).sort({rating:1}).limit(3).toArray()
+    getMovieCollection().find({}).sort({rating:-1}).limit(3).toArray()
         .then(data => callback(data));
 }
 
 exports.update = (model, cb) =>{
-    const filter = {id: ObjectId(model._id)};
+    const filter = {_id: ObjectId(model._id)};
+    console.log(filter);
 
     const update = {$set: {name: model.name, genre : model.genre, rating: model.rating, language: model.language, achievements: model.achievements}};
 
-    getMovieCollection.findOneAndUpdate(filter, update)
+    getMovieCollection().findOneAndUpdate(filter, update)
     .then(()=>{
         cb()
         },
@@ -41,7 +42,7 @@ exports.update = (model, cb) =>{
 }
 
 exports.save = (model, cb) =>{
-    getMovieCollection.insertOne({name: model.name, genre : model.genre, rating: model.rating, language: model.language, achievements: model.achievements})
+    getMovieCollection().insertOne({name: model.name, genre : model.genre, rating: model.rating, language: model.language, achievements: model.achievements})
     .then(()=>{
         cb();
     },
@@ -49,15 +50,14 @@ exports.save = (model, cb) =>{
 }
 
 exports.returnIfHaveAchievement = (req, cb) =>{
-    getMovieCollection.find({ achievements :{ $exists: true, $type: 'array', $ne: [] }}).toArray()
+    getMovieCollection().find({ achievements :{ $exists: true, $type: 'array', $ne: [] }}).toArray()
         .then(data=> cb(data),
             err=> console.log(err));
 }
 
 exports.returnIfHaveBOTHAchievements = (req, cb) =>{
-    getMovieCollection.find({ achievements :{ $exists: true, $type: 'array', $ne: [] }})
-        .find({ achievements :{ $in: ['Super hit'] }})
-        .find({ achievements :{ $in: ['Super Duper Hit'] }})
+    getMovieCollection()//.find({ achievements :{ $exists: true, $type: 'array', $ne: [] }})
+        .find({ $and: [ {achievements :{ $in: ['Super hit'] }}, {achievements :{ $in: ['Super Duper Hit'] }} ] })
     .toArray()
         .then(data=> cb(data),
             err=> console.log(err));
